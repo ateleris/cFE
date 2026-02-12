@@ -99,7 +99,7 @@ function(add_cfe_app APP_NAME APP_SRC_FILES)
 
   # Create the app module
   add_library(${APP_NAME} ${APPTYPE} ${APP_SRC_FILES} ${ARGN})
-  target_link_libraries(${APP_NAME} core_api)
+  target_link_libraries(${APP_NAME} PRIVATE core_api)
 
   # If using "local" EDS linkage, then link the app with the EDS library here.
   # Note that the linker will only pull in the compilation unit that actually
