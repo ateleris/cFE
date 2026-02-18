@@ -1,7 +1,7 @@
 /************************************************************************
- * NASA Docket No. GSC-18,719-1, and identified as “core Flight System: Bootes”
+ * NASA Docket No. GSC-19,200-1, and identified as "cFS Draco"
  *
- * Copyright (c) 2020 United States Government as represented by the
+ * Copyright (c) 2023 United States Government as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All Rights Reserved.
  *
@@ -47,6 +47,10 @@
 #include "cfe_time_api_typedefs.h"
 
 /* ==============   Section I: Macro and Constant Type Definitions   =========== */
+
+/* Macro representing all event types turned on */
+#define CFE_EVS_ALL_EVENT_TYPES_MASK \
+    (CFE_EVS_DEBUG_BIT | CFE_EVS_INFORMATION_BIT | CFE_EVS_ERROR_BIT | CFE_EVS_CRITICAL_BIT)
 
 /* ==============   Section II: Internal Structures ============ */
 
@@ -213,19 +217,21 @@ EVS_BinFilter_t *EVS_FindEventID(uint16 EventID, EVS_BinFilter_t *FilterArray);
 
 /*---------------------------------------------------------------------------------------*/
 /**
- * @brief Enable event types
+ * @brief Set event types using bitmask and bool
  *
- * This routine enables event types selected in BitMask
+ * This routine sets event types selected in a BitMask, true for on, false for off
  */
-void EVS_EnableTypes(EVS_AppData_t *AppDataPtr, uint8 BitMask);
+void EVS_SetTypes(EVS_AppData_t *AppDataPtr, uint8 BitMask, bool State);
 
 /*---------------------------------------------------------------------------------------*/
 /**
- * @brief Disable event types
+ * @brief Converts event array to a BitMask
  *
- * This routine disables event types selected in BitMask
+ * This routine converts the EventTypesActive array in an AppData Struct to a BitMask
+ *
+ * @returns uint8 BitMask for active event types in an app
  */
-void EVS_DisableTypes(EVS_AppData_t *AppDataPtr, uint8 BitMask);
+uint8 EVS_EventArrayToBitMask(const EVS_AppData_t *AppDataPtr);
 
 /*---------------------------------------------------------------------------------------*/
 /**
@@ -251,5 +257,19 @@ void EVS_GenerateEventTelemetry(EVS_AppData_t *AppDataPtr, uint16 EventID, CFE_E
  * which can be time consuming on some platforms.
  */
 int32 EVS_SendEvent(uint16 EventID, CFE_EVS_EventType_Enum_t EventType, const char *Spec, ...);
+
+/**
+ * @brief Checks if the provided BitMask is invalid.
+ *
+ * This function evaluates whether the given BitMask is either zero or exceeds the maximum allowed
+ * value defined by CFE_EVS_ALL_EVENT_TYPES_MASK (which represents all events types turned on).
+ * If the BitMask is invalid, an error event is sent and the function returns true.
+ *
+ * @param BitMask The bitmask to be checked.
+ * @param CommandCode The command code associated with the bitmask.
+ *
+ * @return true if the BitMask is invalid, false otherwise.
+ */
+bool EVS_IsInvalidBitMask(uint32 BitMask, uint16 CommandCode);
 
 #endif /* CFE_EVS_UTILS_H */
